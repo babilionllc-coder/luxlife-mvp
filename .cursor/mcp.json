@@ -1,0 +1,58 @@
+{
+  "tools": {
+    "firebase": {
+      "type": "http",
+      "baseUrl": "https://firestore.googleapis.com/v1/projects/luxlifemvp/databases/(default)/documents",
+      "headers": {
+        "Authorization": "Bearer ${FIREBASE_TOKEN}",
+        "Content-Type": "application/json"
+      },
+      "description": "Interact with Firestore documents (read/write) for LuxLife orders, users, and metrics."
+    },
+    "firebaseStorage": {
+      "type": "http",
+      "baseUrl": "https://firebasestorage.googleapis.com/v0/b/luxlifemvp.firebasestorage.app/o",
+      "headers": {
+        "Authorization": "Bearer ${FIREBASE_TOKEN}"
+      },
+      "description": "Upload or fetch signed URLs from Firebase Storage (uploads/videos)."
+    },
+    "stripe": {
+      "type": "http",
+      "baseUrl": "https://api.stripe.com/v1",
+      "headers": {
+        "Authorization": "Bearer ${STRIPE_SECRET_KEY}",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      "description": "Manage Stripe Checkout sessions, customers, and refunds."
+    },
+    "replicate": {
+      "type": "http",
+      "baseUrl": "https://api.replicate.com/v1",
+      "headers": {
+        "Authorization": "Token ${REPLICATE_API_TOKEN}",
+        "Content-Type": "application/json"
+      },
+      "description": "Trigger background video/prediction jobs from Replicate."
+    },
+    "did": {
+      "type": "http",
+      "baseUrl": "https://api.d-id.com/v1",
+      "headers": {
+        "Authorization": "Bearer ${DID_API_KEY}",
+        "Content-Type": "application/json"
+      },
+      "description": "Call D-ID for face animation or talking portrait generation."
+    },
+    "resend": {
+      "type": "http",
+      "baseUrl": "https://api.resend.com",
+      "headers": {
+        "Authorization": "Bearer ${RESEND_API_KEY}",
+        "Content-Type": "application/json"
+      },
+      "description": "Send transactional emails via Resend (order confirmations, delivery notifications)."
+    }
+  }
+}
+

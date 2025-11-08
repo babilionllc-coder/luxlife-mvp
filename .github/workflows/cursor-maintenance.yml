@@ -1,0 +1,78 @@
+name: Cursor Automated Maintenance
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays at 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install project dependencies
+        run: |
+          npm ci
+          npm --prefix functions ci
+
+      - name: Install Cursor CLI
+        run: npm install -g @cursor-cli/cursor
+
+      - name: Authenticate Cursor CLI
+        run: cursor login --api-key "$CURSOR_API_KEY"
+
+      - name: Run automated lint maintenance via Cursor
+        run: |
+          cursor headless \
+            --cwd "$GITHUB_WORKSPACE" \
+            --accept all \
+            --prompt "You are maintaining the LuxLife repo. Confirm dependencies are installed, run npm run lint -- --fix at the project root and npm --prefix functions run lint -- --fix, and append an entry with today's UTC date and a short summary to docs/maintenance/weekly-lint-report.md. Only modify files if fixes are required." \
+            --files "package.json" "package-lock.json" "functions/package.json" "functions/package-lock.json" "src/**" "functions/src/**" "docs/maintenance/weekly-lint-report.md"
+
+      - name: Cleanup generated artifacts
+        run: rm -rf .firebase
+
+      - name: Verify functions build
+        run: npm --prefix functions run build
+
+      - name: Verify web lint
+        run: npm run lint -- --max-warnings=0
+
+      - name: Detect changes
+        id: detect
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.detect.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: weekly lint maintenance"
+          branch: automation/cursor-weekly-maintenance
+          title: "chore: weekly lint maintenance"
+          body: |
+            Automated Cursor CLI maintenance run.
+
+            - Executes lint auto-fix via Cursor headless mode
+            - Verifies functions build and root lint
+            - Updates docs/maintenance/weekly-lint-report.md with a summary entry
+          labels: automation, maintenance
+
