@@ -29,7 +29,7 @@ jobs:
           npm --prefix functions ci
 
       - name: Install Cursor CLI
-        run: npm install -g @cursor-cli/cursor
+        run: npm install -g @cursorai/cursor
 
       - name: Authenticate Cursor CLI
         run: cursor login --api-key "$CURSOR_API_KEY"
