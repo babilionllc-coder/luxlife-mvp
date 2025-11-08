@@ -29,7 +29,10 @@ jobs:
           npm --prefix functions ci
 
       - name: Install Cursor CLI
-        run: npm install -g @cursorai/cursor
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          cursor --version
 
       - name: Authenticate Cursor CLI
         run: cursor login --api-key "$CURSOR_API_KEY"
